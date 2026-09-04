@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Volatilidad">
+<meta name="theme-color" content="#2c3a63">
+<meta name="format-detection" content="telephone=no">
+<title>La volatilidad le cuesta dinero a tu inversión</title>
+<style>
+  :root{
+    --bg:#f4f6fb;
+    --card:#ffffff;
+    --ink:#1c2230;
+    --muted:#6b7280;
+    --a-color:#0e9594;
+    --a-soft:#e3f7f6;
+    --b-color:#f2622e;
+    --b-soft:#feede1;
+    --ref-color:#9aa1ae;
+    --line:#e5e8f0;
+    --radius:18px;
+    font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,#eef2fb 0%, #f4f6fb 40%);
+    color:var(--ink);
+    padding:32px 16px 80px;
+    padding-left:max(16px, env(safe-area-inset-left));
+    padding-right:max(16px, env(safe-area-inset-right));
+    padding-bottom:max(80px, env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  @media (max-width:480px){
+    body{padding:20px 12px 60px;}
+    header h1{font-size:1.4rem;}
+    header p{font-size:.92rem;}
+    .analogy{padding:14px 16px;font-size:.9rem;}
+    .card{padding:18px 16px;}
+    .kpi-card{padding:16px 16px;}
+    .banner{padding:20px 18px;}
+  }
+
+  header{text-align:center;margin-bottom:28px;}
+  header h1{
+    font-size:clamp(1.5rem,3vw,2.3rem);
+    margin:0 0 10px;
+    line-height:1.25;
+  }
+  header p{
+    color:var(--muted);
+    max-width:720px;
+    margin:0 auto;
+    font-size:1.02rem;
+    line-height:1.55;
+  }
+  .analogy{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:18px 24px;
+    max-width:760px;
+    margin:20px auto 0;
+    box-shadow:0 8px 24px rgba(20,30,60,.06);
+    font-size:.98rem;
+    line-height:1.6;
+    border-left:5px solid #ffcf5c;
+  }
+  .analogy b{color:var(--ink);}
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap:20px;
+    margin-top:28px;
+  }
+  @media (max-width:880px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    box-shadow:0 8px 24px rgba(20,30,60,.06);
+  }
+  .card h2{
+    font-size:1.05rem;
+    margin:0 0 16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .control{margin-bottom:24px;}
+  .control:last-child{margin-bottom:0;}
+  .control-label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:6px;
+    font-size:.9rem;
+    margin-bottom:6px;
+    font-weight:600;
+  }
+  .control-label span.val{
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+    padding:2px 10px;
+    border-radius:999px;
+    background:var(--bg);
+    margin-left:auto;
+  }
+  input[type=range]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:34px;
+    background:transparent;
+    margin:0;
+    touch-action:pan-y;
+    accent-color:#4b5efc;
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:6px;
+    border-radius:3px;
+    background:var(--line);
+  }
+  input[type=range]::-moz-range-track{
+    height:6px;
+    border-radius:3px;
+    background:var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:26px;
+    height:26px;
+    margin-top:-10px;
+    border-radius:50%;
+    background:#4b5efc;
+    border:3px solid #fff;
+    box-shadow:0 2px 8px rgba(20,30,60,.35);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:26px;
+    height:26px;
+    border:3px solid #fff;
+    border-radius:50%;
+    background:#4b5efc;
+    box-shadow:0 2px 8px rgba(20,30,60,.35);
+  }
+  .control.a input[type=range]{accent-color:var(--a-color);}
+  .control.a input[type=range]::-webkit-slider-thumb{background:var(--a-color);}
+  .control.a input[type=range]::-moz-range-thumb{background:var(--a-color);}
+  .control.b input[type=range]{accent-color:var(--b-color);}
+  .control.b input[type=range]::-webkit-slider-thumb{background:var(--b-color);}
+  .control.b input[type=range]::-moz-range-thumb{background:var(--b-color);}
+  .control small{color:var(--muted);display:block;margin-top:4px;font-size:.78rem;}
+
+  .fund-tag{
+    display:inline-block;
+    font-size:.72rem;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:999px;
+    margin-left:8px;
+  }
+  .fund-tag.low{background:var(--a-soft);color:var(--a-color);}
+  .fund-tag.high{background:var(--b-soft);color:var(--b-color);}
+
+  .chart-card{grid-column:1 / -1;}
+  .chart-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);row-gap:8px;}
+  .legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;}
+  .legend .dot.a{background:var(--a-color);}
+  .legend .dot.b{background:var(--b-color);}
+  .legend .dot.ref{background:var(--ref-color);}
+  .ref-toggle{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);cursor:pointer;user-select:none;padding:6px 4px;margin:-6px -4px;}
+  .ref-toggle input[type=checkbox]{width:18px;height:18px;margin:0;flex-shrink:0;}
+
+  svg{width:100%;height:auto;display:block;margin-top:10px;}
+  .axis-label{font-size:11px;fill:var(--muted);font-family:inherit;}
+  .gridline{stroke:var(--line);stroke-width:1;}
+  .line-a{fill:none;stroke:var(--a-color);stroke-width:3;}
+  .line-b{fill:none;stroke:var(--b-color);stroke-width:3;}
+  .line-ref{fill:none;stroke:var(--ref-color);stroke-width:2;stroke-dasharray:6 5;}
+  .dot-final{stroke:white;stroke-width:2;}
+
+  .table-card{grid-column:1 / -1;}
+  .table-scroll{
+    overflow:auto;
+    max-height:440px;
+    margin-top:10px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    -webkit-overflow-scrolling:touch;
+  }
+  table.year-table{
+    width:100%;
+    min-width:560px;
+    border-collapse:collapse;
+    font-size:.85rem;
+    font-variant-numeric:tabular-nums;
+  }
+  .year-table th, .year-table td{
+    padding:8px 12px;
+    text-align:right;
+    white-space:nowrap;
+  }
+  .year-table th:first-child, .year-table td:first-child{text-align:center;}
+  .year-table thead th{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--ink);
+    color:#fff;
+    font-weight:700;
+    font-size:.75rem;
+    line-height:1.3;
+  }
+  .year-table thead th.col-a{background:var(--a-color);}
+  .year-table thead th.col-b{background:var(--b-color);}
+  .year-table tbody tr:nth-child(even) td:first-child{background:#f2f4f9;}
+  .year-table tbody tr td.col-a{background:var(--a-soft);}
+  .year-table tbody tr td.col-b{background:var(--b-soft);}
+  .year-table tbody tr.row-zero td{color:var(--muted);font-style:italic;}
+  .year-table tfoot td{
+    position:sticky;
+    bottom:0;
+    background:#eef1f8;
+    font-weight:700;
+    border-top:2px solid var(--line);
+    z-index:2;
+  }
+  .year-table tfoot td.col-a{background:var(--a-soft);}
+  .year-table tfoot td.col-b{background:var(--b-soft);}
+  .year-table tfoot tr.diff-row td{
+    background:linear-gradient(120deg,#1c2438,#2c3a63);
+    color:#fff;
+    text-align:center;
+    font-size:.85rem;
+    font-weight:600;
+    white-space:normal;
+    padding:12px;
+  }
+  .year-table tfoot tr.diff-row td em{font-style:normal;color:#ffd166;}
+  @media (max-width:480px){
+    table.year-table{font-size:.72rem;min-width:480px;}
+    .year-table th, .year-table td{padding:6px 6px;}
+  }
+
+  .kpis{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    grid-column:1 / -1;
+  }
+  @media (max-width:700px){ .kpis{grid-template-columns:1fr;} }
+  .kpi-card{
+    border-radius:var(--radius);
+    padding:20px 22px;
+    box-shadow:0 8px 24px rgba(20,30,60,.06);
+  }
+  .kpi-card.a{background:var(--a-soft);}
+  .kpi-card.b{background:var(--b-soft);}
+  .kpi-card h3{
+    margin:0 0 14px;
+    font-size:1rem;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:space-between;
+  }
+  .kpi-card h3 .fund-title{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+  .kpi-row{
+    display:flex;
+    justify-content:space-between;
+    padding:7px 0;
+    border-bottom:1px dashed rgba(0,0,0,.08);
+    font-size:.92rem;
+  }
+  .kpi-row:last-child{border-bottom:none;}
+  .kpi-row .lbl{color:#555;}
+  .kpi-row .v{font-weight:700;font-variant-numeric:tabular-nums;}
+  .kpi-card.a .kpi-row .v{color:var(--a-color);}
+  .kpi-card.b .kpi-row .v{color:var(--b-color);}
+  .kpi-card .final{font-size:1.25rem;}
+
+  .banner{
+    grid-column:1 / -1;
+    border-radius:var(--radius);
+    padding:24px 26px;
+    background:linear-gradient(120deg,#1c2438,#2c3a63);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:22px;
+    flex-wrap:wrap;
+    box-shadow:0 10px 30px rgba(20,30,60,.18);
+  }
+  .banner .big{
+    font-size:clamp(1.4rem,3vw,2rem);
+    font-weight:800;
+    line-height:1.2;
+  }
+  .banner .big em{font-style:normal;color:#ffd166;}
+  .banner p{margin:6px 0 0;color:#c7cde0;font-size:.92rem;max-width:640px;line-height:1.5;}
+
+  details.formula{
+    grid-column:1 / -1;
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:18px 24px;
+    box-shadow:0 8px 24px rgba(20,30,60,.06);
+  }
+  details.formula summary{
+    cursor:pointer;
+    font-weight:700;
+    font-size:.95rem;
+    padding:6px 2px;
+    margin:-6px -2px;
+  }
+  .formula-body{margin-top:14px;font-size:.92rem;line-height:1.65;color:#333;}
+  .formula-body code{
+    background:var(--bg);
+    padding:2px 8px;
+    border-radius:8px;
+    font-size:.88rem;
+  }
+  .formula-nums{
+    display:flex;gap:24px;margin-top:10px;flex-wrap:wrap;font-size:.9rem;
+  }
+  .formula-nums div{background:var(--bg);padding:10px 14px;border-radius:12px;}
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:.78rem;
+    margin-top:30px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>El mismo rendimiento promedio... ¿resultados muy distintos?</h1>
+    <p>Mueve los controles para descubrir por qué la <b>consistencia</b> de un fondo importa tanto como su rendimiento promedio a la hora de acumular capital a largo plazo.</p>
+    <div class="analogy">
+      🐢🐇 <b>Piénsalo como una carrera:</b> dos autos viajan en promedio a la misma velocidad. Uno mantiene un ritmo constante. El otro acelera y frena bruscamente: a veces vuela, a veces retrocede. Aunque el <b>promedio</b> de velocidad sea idéntico, el auto parejo llega más lejos. Con las inversiones pasa lo mismo: esos "acelerones y frenones" son la <b>volatilidad (desviación estándar)</b>, y entre más grande es, más capital se pierde en el camino aunque el rendimiento promedio anunciado sea igual.
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>🎛️ Controles</h2>
+      <div class="control">
+        <div class="control-label"><span>Rendimiento promedio anual (igual para ambos fondos)</span><span class="val" id="v-mean">10.0%</span></div>
+        <input type="range" id="mean" min="2" max="20" step="0.5" value="10">
+        <small>Es el promedio simple de los rendimientos anuales — el número que normalmente anuncia un fondo.</small>
+      </div>
+      <div class="control a">
+        <div class="control-label"><span>Volatilidad Fondo A <span class="fund-tag low" id="tag-a">menor</span></span><span class="val" id="v-stdA">8.0%</span></div>
+        <input type="range" id="stdA" min="0" max="40" step="1" value="8">
+      </div>
+      <div class="control b">
+        <div class="control-label"><span>Volatilidad Fondo B <span class="fund-tag high" id="tag-b">mayor</span></span><span class="val" id="v-stdB">25.0%</span></div>
+        <input type="range" id="stdB" min="0" max="40" step="1" value="25">
+        <small>La volatilidad mide qué tanto suben y bajan los rendimientos año a año respecto al promedio.</small>
+      </div>
+      <div class="control">
+        <div class="control-label"><span>Plazo a analizar</span><span class="val" id="v-years">30 años</span></div>
+        <input type="range" id="years" min="2" max="50" step="1" value="30">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>💰 Inversión</h2>
+      <div class="kpi-row"><span class="lbl">Inversión inicial (única)</span><span class="v">$1,000,000</span></div>
+      <div class="kpi-row"><span class="lbl">Rendimiento promedio anual</span><span class="v" id="k-mean">10.0%</span></div>
+      <div class="kpi-row"><span class="lbl">Plazo</span><span class="v" id="k-years">30 años</span></div>
+      <p style="margin-top:16px;color:var(--muted);font-size:.88rem;line-height:1.55;">
+        Ambos fondos parten del <b>mismo dinero</b> y del <b>mismo rendimiento promedio anunciado</b>. La única diferencia entre ellos es qué tan parejo o irregular es ese rendimiento año con año.
+      </p>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-top">
+        <h2 style="margin:0;">📈 Capital acumulado a lo largo del tiempo</h2>
+        <div class="legend">
+          <span><i class="dot a"></i>Fondo A</span>
+          <span><i class="dot b"></i>Fondo B</span>
+          <label class="ref-toggle"><input type="checkbox" id="showRef" checked><i class="dot ref"></i>Interés compuesto "ingenuo" (sin volatilidad)</label>
+        </div>
+      </div>
+      <svg id="chart" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="card table-card">
+      <h2>📋 Detalle año por año</h2>
+      <div class="table-scroll">
+        <table class="year-table">
+          <thead>
+            <tr>
+              <th>Año</th>
+              <th class="col-a">Rendimiento<br>Fondo A</th>
+              <th class="col-a">Capital fin año<br>Fondo A</th>
+              <th class="col-b">Rendimiento<br>Fondo B</th>
+              <th class="col-b">Capital fin año<br>Fondo B</th>
+            </tr>
+          </thead>
+          <tbody id="yearTableBody"></tbody>
+          <tfoot id="yearTableFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="kpi-card a">
+      <h3><span class="fund-title">🅰️ Fondo A <span class="fund-tag low" id="tag-a2">menor volatilidad</span></span></h3>
+      <div class="kpi-row"><span class="lbl">Promedio aritmético anual</span><span class="v" id="a-mean">10.0%</span></div>
+      <div class="kpi-row"><span class="lbl">Volatilidad (desv. estándar)</span><span class="v" id="a-std">8.0%</span></div>
+      <div class="kpi-row"><span class="lbl">Rendimiento compuesto real (CAGR)</span><span class="v" id="a-cagr">9.7%</span></div>
+      <div class="kpi-row final"><span class="lbl">Capital final</span><span class="v" id="a-final">$—</span></div>
+    </div>
+
+    <div class="kpi-card b">
+      <h3><span class="fund-title">🅱️ Fondo B <span class="fund-tag high" id="tag-b2">mayor volatilidad</span></span></h3>
+      <div class="kpi-row"><span class="lbl">Promedio aritmético anual</span><span class="v" id="b-mean">10.0%</span></div>
+      <div class="kpi-row"><span class="lbl">Volatilidad (desv. estándar)</span><span class="v" id="b-std">25.0%</span></div>
+      <div class="kpi-row"><span class="lbl">Rendimiento compuesto real (CAGR)</span><span class="v" id="b-cagr">6.8%</span></div>
+      <div class="kpi-row final"><span class="lbl">Capital final</span><span class="v" id="b-final">$—</span></div>
+    </div>
+
+    <div class="banner">
+      <div style="flex:1;min-width:280px;">
+        <div class="big" id="banner-text">Cargando...</div>
+        <p id="banner-sub"></p>
+      </div>
+    </div>
+
+    <details class="formula">
+      <summary>¿Por qué pasa esto? (la explicación matemática, en corto)</summary>
+      <div class="formula-body">
+        Cuando un rendimiento sube y baja (tiene volatilidad), el promedio que realmente termina "ganando" tu dinero con el paso de los años
+        <b>no es el promedio aritmético</b> — es el <b>promedio geométrico</b> (el rendimiento compuesto real), y este siempre es un poco menor.
+        La aproximación estándar en finanzas es:
+        <br><br>
+        <code>Rendimiento compuesto ≈ Rendimiento promedio − (Volatilidad)² / 2</code>
+        <br><br>
+        Entre mayor sea la volatilidad, mayor es la "penalización" que se resta. Con tus valores actuales:
+        <div class="formula-nums">
+          <div>Fondo A: 10% − (<span id="f-stdA">8%</span>)²/2 ≈ <b id="f-approxA">–</b></div>
+          <div>Fondo B: 10% − (<span id="f-stdB">25%</span>)²/2 ≈ <b id="f-approxB">–</b></div>
+        </div>
+        Por eso, dos fondos con el mismo rendimiento "de folleto" pueden terminar con montos de capital muy distintos después de varios años.
+      </div>
+    </details>
+
+  </div>
+
+  <footer>
+    Simulación educativa: las series de rendimiento se generan con un patrón aleatorio fijo, ajustado matemáticamente para que
+    cada fondo tenga exactamente el promedio y la volatilidad que definiste en los controles. Útil para entender el efecto de la volatilidad,
+    no es una proyección de ningún producto financiero real.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const INITIAL = 1000000;
+  const MAX_YEARS = 50;
+
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function normals(seed, n){
+    const rnd = mulberry32(seed);
+    const out = [];
+    for(let i=0;i<n;i+=2){
+      const u1 = Math.max(rnd(), 1e-9);
+      const u2 = rnd();
+      const r = Math.sqrt(-2*Math.log(u1));
+      out.push(r*Math.cos(2*Math.PI*u2));
+      if(i+1<n) out.push(r*Math.sin(2*Math.PI*u2));
+    }
+    return out;
+  }
+
+  const zA = normals(1234, MAX_YEARS);
+  const zB = normals(5678, MAX_YEARS);
+
+  function stdev(arr){
+    const n = arr.length;
+    if(n<2) return 0;
+    const m = arr.reduce((a,b)=>a+b,0)/n;
+    const v = arr.reduce((a,b)=>a+(b-m)*(b-m),0)/(n-1);
+    return Math.sqrt(v);
+  }
+
+  function buildReturns(zArr, n, mean, std){
+    const z = zArr.slice(0,n);
+    const m = z.reduce((a,b)=>a+b,0)/n;
+    const demeaned = z.map(v=>v-m);
+    const sd = stdev(demeaned);
+    const normalized = demeaned.map(v => sd>0 ? v/sd : 0);
+    return normalized.map(v => mean + std*v);
+  }
+
+  function capitalPath(returns){
+    const path = [INITIAL];
+    for(const r of returns){
+      path.push(path[path.length-1]*(1+r));
+    }
+    return path;
+  }
+
+  function fmtMoney(v){
+    if(Math.abs(v)>=1000000) return '$' + (v/1000000).toLocaleString('es-MX',{maximumFractionDigits:2}) + 'M';
+    if(Math.abs(v)>=1000) return '$' + (v/1000).toLocaleString('es-MX',{maximumFractionDigits:0}) + 'K';
+    return '$' + v.toLocaleString('es-MX',{maximumFractionDigits:0});
+  }
+  function fmtMoneyFull(v){
+    return v.toLocaleString('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+  }
+  function fmtPct(v){ return (v*100).toFixed(1)+'%'; }
+
+  const el = id => document.getElementById(id);
+  const meanSlider = el('mean'), stdASlider = el('stdA'), stdBSlider = el('stdB'), yearsSlider = el('years');
+  const showRef = el('showRef');
+
+  function drawChart(pathA, pathB, pathRef, n){
+    const svg = el('chart');
+    const containerW = svg.getBoundingClientRect().width || svg.parentElement.clientWidth || 900;
+    const isNarrow = containerW < 480;
+    const W = Math.max(Math.round(containerW), 260);
+    const H = Math.round(Math.max(220, Math.min(360, W*0.5)));
+    const padL = isNarrow ? 52 : 70, padR = isNarrow ? 10 : 20, padT = 16, padB = isNarrow ? 34 : 40;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const plotW = W-padL-padR, plotH = H-padT-padB;
+
+    const allVals = pathA.concat(pathB).concat(showRef.checked?pathRef:[]);
+    const maxV = Math.max(...allVals) * 1.08;
+    const minV = 0;
+
+    const x = i => padL + (i/n)*plotW;
+    const y = v => padT + plotH - ((v-minV)/(maxV-minV))*plotH;
+
+    let s = '';
+    const gridN = isNarrow ? 4 : 5;
+    const axisFont = isNarrow ? 9 : 11;
+    for(let g=0; g<=gridN; g++){
+      const val = minV + (maxV-minV)*g/gridN;
+      const yy = y(val);
+      s += `<line class="gridline" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>`;
+      s += `<text class="axis-label" style="font-size:${axisFont}px" x="${padL-8}" y="${yy+4}" text-anchor="end">${fmtMoney(val)}</text>`;
+    }
+
+    const xTicks = Math.min(n, isNarrow ? 4 : 10);
+    for(let t=0; t<=xTicks; t++){
+      const yearIdx = Math.round(n*t/xTicks);
+      const xx = x(yearIdx);
+      s += `<text class="axis-label" style="font-size:${axisFont}px" x="${xx}" y="${H-padB+18}" text-anchor="middle">${yearIdx}</text>`;
+    }
+    s += `<text class="axis-label" style="font-size:${axisFont}px" x="${padL+plotW/2}" y="${H-4}" text-anchor="middle">Años</text>`;
+
+    function pathStr(arr){
+      return arr.map((v,i)=> (i===0?'M':'L') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+    }
+
+    if(showRef.checked){
+      s += `<path class="line-ref" d="${pathStr(pathRef)}"/>`;
+    }
+    s += `<path class="line-a" d="${pathStr(pathA)}"/>`;
+    s += `<path class="line-b" d="${pathStr(pathB)}"/>`;
+
+    s += `<circle class="dot-final" cx="${x(n)}" cy="${y(pathA[n])}" r="5" fill="var(--a-color)"/>`;
+    s += `<circle class="dot-final" cx="${x(n)}" cy="${y(pathB[n])}" r="5" fill="var(--b-color)"/>`;
+
+    svg.innerHTML = s;
+  }
+
+  function renderTable(retA, retB, pathA, pathB, cagrA, cagrB, n){
+    let rows = `<tr class="row-zero"><td>0</td><td class="col-a">—</td><td class="col-a">${fmtMoneyFull(pathA[0])}</td><td class="col-b">—</td><td class="col-b">${fmtMoneyFull(pathB[0])}</td></tr>`;
+    for(let i=1;i<=n;i++){
+      rows += `<tr><td>${i}</td><td class="col-a">${fmtPct(retA[i-1])}</td><td class="col-a">${fmtMoneyFull(pathA[i])}</td><td class="col-b">${fmtPct(retB[i-1])}</td><td class="col-b">${fmtMoneyFull(pathB[i])}</td></tr>`;
+    }
+    el('yearTableBody').innerHTML = rows;
+
+    const meanA = retA.reduce((a,b)=>a+b,0)/n;
+    const meanB = retB.reduce((a,b)=>a+b,0)/n;
+    const winnerIsA = pathA[n] >= pathB[n];
+    const diff = Math.abs(pathA[n]-pathB[n]);
+    const diffPct = Math.abs(pathA[n]/pathB[n]-1);
+
+    el('yearTableFoot').innerHTML = `
+      <tr>
+        <td>Promedio aritmético</td>
+        <td class="col-a">${fmtPct(meanA)}</td><td class="col-a"></td>
+        <td class="col-b">${fmtPct(meanB)}</td><td class="col-b"></td>
+      </tr>
+      <tr>
+        <td>CAGR (rend. compuesto real)</td>
+        <td class="col-a">${fmtPct(cagrA)}</td><td class="col-a">${fmtMoneyFull(pathA[n])}</td>
+        <td class="col-b">${fmtPct(cagrB)}</td><td class="col-b">${fmtMoneyFull(pathB[n])}</td>
+      </tr>
+      <tr class="diff-row">
+        <td colspan="5">Diferencia de capital acumulado: <em>${winnerIsA ? 'Fondo A' : 'Fondo B'}</em> termina con <em>${fmtMoneyFull(diff)} más</em> (${fmtPct(diffPct)}) que el otro fondo, con el mismo rendimiento promedio aritmético.</td>
+      </tr>
+    `;
+  }
+
+  function update(){
+    const mean = parseFloat(meanSlider.value)/100;
+    const stdA = parseFloat(stdASlider.value)/100;
+    const stdB = parseFloat(stdBSlider.value)/100;
+    const n = parseInt(yearsSlider.value);
+
+    el('v-mean').textContent = fmtPct(mean);
+    el('v-stdA').textContent = fmtPct(stdA);
+    el('v-stdB').textContent = fmtPct(stdB);
+    el('v-years').textContent = n + ' años';
+    el('k-mean').textContent = fmtPct(mean);
+    el('k-years').textContent = n + ' años';
+
+    const lowIsA = stdA <= stdB;
+    el('tag-a').textContent = lowIsA ? 'menor' : 'mayor';
+    el('tag-a').className = 'fund-tag ' + (lowIsA ? 'low':'high');
+    el('tag-b').textContent = lowIsA ? 'mayor' : 'menor';
+    el('tag-b').className = 'fund-tag ' + (lowIsA ? 'high':'low');
+    el('tag-a2').textContent = lowIsA ? 'menor volatilidad' : 'mayor volatilidad';
+    el('tag-a2').className = 'fund-tag ' + (lowIsA ? 'low':'high');
+    el('tag-b2').textContent = lowIsA ? 'mayor volatilidad' : 'menor volatilidad';
+    el('tag-b2').className = 'fund-tag ' + (lowIsA ? 'high':'low');
+
+    const retA = buildReturns(zA, n, mean, stdA);
+    const retB = buildReturns(zB, n, mean, stdB);
+    const pathA = capitalPath(retA);
+    const pathB = capitalPath(retB);
+    const pathRef = [];
+    for(let i=0;i<=n;i++) pathRef.push(INITIAL*Math.pow(1+mean,i));
+
+    const cagrA = Math.pow(pathA[n]/INITIAL, 1/n)-1;
+    const cagrB = Math.pow(pathB[n]/INITIAL, 1/n)-1;
+
+    el('a-mean').textContent = fmtPct(mean);
+    el('a-std').textContent = fmtPct(stdA);
+    el('a-cagr').textContent = fmtPct(cagrA);
+    el('a-final').textContent = fmtMoneyFull(pathA[n]);
+
+    el('b-mean').textContent = fmtPct(mean);
+    el('b-std').textContent = fmtPct(stdB);
+    el('b-cagr').textContent = fmtPct(cagrB);
+    el('b-final').textContent = fmtMoneyFull(pathB[n]);
+
+    el('f-stdA').textContent = fmtPct(stdA);
+    el('f-stdB').textContent = fmtPct(stdB);
+    el('f-approxA').textContent = fmtPct(mean - (stdA*stdA)/2);
+    el('f-approxB').textContent = fmtPct(mean - (stdB*stdB)/2);
+
+    const winnerIsA = pathA[n] >= pathB[n];
+    const winnerFinal = winnerIsA ? pathA[n] : pathB[n];
+    const loserFinal = winnerIsA ? pathB[n] : pathA[n];
+    const winnerStd = winnerIsA ? stdA : stdB;
+    const loserStd = winnerIsA ? stdB : stdA;
+    const diff = winnerFinal - loserFinal;
+    const diffPct = (winnerFinal/loserFinal - 1)*100;
+
+    if(Math.abs(stdA-stdB) < 0.0005){
+      el('banner-text').innerHTML = `Con la misma volatilidad (${fmtPct(stdA)}), ambos fondos acumulan prácticamente lo mismo.`;
+      el('banner-sub').textContent = 'Cambia una de las dos volatilidades para ver cómo se abre la diferencia.';
+    } else {
+      el('banner-text').innerHTML = `El fondo con <em>menor volatilidad</em> (${fmtPct(winnerStd)}) terminó con <em>${fmtMoneyFull(diff)} más</em> que el de mayor volatilidad (${fmtPct(loserStd)}).`;
+      el('banner-sub').textContent = `Eso es ${diffPct.toFixed(0)}% más capital acumulado en ${n} años — sin cambiar el rendimiento promedio anunciado, solo la consistencia con la que se logra.`;
+    }
+
+    drawChart(pathA, pathB, pathRef, n);
+    renderTable(retA, retB, pathA, pathB, cagrA, cagrB, n);
+  }
+
+  [meanSlider, stdASlider, stdBSlider, yearsSlider, showRef].forEach(input=>{
+    input.addEventListener('input', update);
+  });
+  let resizeTimer;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(update, 100);
+  });
+  window.addEventListener('orientationchange', ()=> setTimeout(update, 150));
+  update();
+})();
+</script>
+</body>
+</html>
