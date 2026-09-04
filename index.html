@@ -1,35 +1,92 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Volatilidad">
-<meta name="theme-color" content="#2c3a63">
-<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>La volatilidad le cuesta dinero a tu inversión</title>
 <style>
   :root{
     --bg:#f4f6fb;
+    --bg-top:#eef2fb;
     --card:#ffffff;
     --ink:#1c2230;
     --muted:#6b7280;
+    --lbl:#555c6b;
+    --body-text:#333a49;
     --a-color:#0e9594;
     --a-soft:#e3f7f6;
     --b-color:#f2622e;
     --b-soft:#feede1;
     --ref-color:#9aa1ae;
     --line:#e5e8f0;
+    --zebra:#f2f4f9;
+    --foot:#eef1f8;
+    --dot-stroke:#ffffff;
+    --shadow:0 8px 24px rgba(20,30,60,.06);
     --radius:18px;
     font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141824;
+      --bg-top:#181e2e;
+      --card:#1e2536;
+      --ink:#e8ebf4;
+      --muted:#98a0b3;
+      --lbl:#aeb5c6;
+      --body-text:#cfd5e3;
+      --a-color:#31bdbb;
+      --a-soft:#15343a;
+      --b-color:#f97e4e;
+      --b-soft:#3a2618;
+      --ref-color:#7c8496;
+      --line:#2b3348;
+      --zebra:#232b40;
+      --foot:#202839;
+      --dot-stroke:#1e2536;
+      --shadow:0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#141824;
+    --bg-top:#181e2e;
+    --card:#1e2536;
+    --ink:#e8ebf4;
+    --muted:#98a0b3;
+    --lbl:#aeb5c6;
+    --body-text:#cfd5e3;
+    --a-color:#31bdbb;
+    --a-soft:#15343a;
+    --b-color:#f97e4e;
+    --b-soft:#3a2618;
+    --ref-color:#7c8496;
+    --line:#2b3348;
+    --zebra:#232b40;
+    --foot:#202839;
+    --dot-stroke:#1e2536;
+    --shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --bg:#f4f6fb;
+    --bg-top:#eef2fb;
+    --card:#ffffff;
+    --ink:#1c2230;
+    --muted:#6b7280;
+    --lbl:#555c6b;
+    --body-text:#333a49;
+    --a-color:#0e9594;
+    --a-soft:#e3f7f6;
+    --b-color:#f2622e;
+    --b-soft:#feede1;
+    --ref-color:#9aa1ae;
+    --line:#e5e8f0;
+    --zebra:#f2f4f9;
+    --foot:#eef1f8;
+    --dot-stroke:#ffffff;
+    --shadow:0 8px 24px rgba(20,30,60,.06);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   body{
     margin:0;
-    background:linear-gradient(180deg,#eef2fb 0%, #f4f6fb 40%);
+    background:linear-gradient(180deg,var(--bg-top) 0%, var(--bg) 40%);
     color:var(--ink);
     padding:32px 16px 80px;
     padding-left:max(16px, env(safe-area-inset-left));
@@ -46,7 +103,8 @@
     .analogy{padding:14px 16px;font-size:.9rem;}
     .card{padding:18px 16px;}
     .kpi-card{padding:16px 16px;}
-    .banner{padding:20px 18px;}
+    .banner{padding:20px 16px;}
+    .analogy{overflow-wrap:break-word;}
   }
 
   header{text-align:center;margin-bottom:28px;}
@@ -54,6 +112,7 @@
     font-size:clamp(1.5rem,3vw,2.3rem);
     margin:0 0 10px;
     line-height:1.25;
+    text-wrap:balance;
   }
   header p{
     color:var(--muted);
@@ -68,26 +127,28 @@
     padding:18px 24px;
     max-width:760px;
     margin:20px auto 0;
-    box-shadow:0 8px 24px rgba(20,30,60,.06);
+    box-shadow:var(--shadow);
     font-size:.98rem;
     line-height:1.6;
     border-left:5px solid #ffcf5c;
+    text-align:left;
   }
   .analogy b{color:var(--ink);}
 
   .grid{
     display:grid;
-    grid-template-columns: 1.1fr 1fr;
+    grid-template-columns: minmax(0,1.1fr) minmax(0,1fr);
     gap:20px;
     margin-top:28px;
   }
-  @media (max-width:880px){ .grid{grid-template-columns:1fr;} }
+  .grid > *{min-width:0;}
+  @media (max-width:880px){ .grid{grid-template-columns:minmax(0,1fr);} }
 
   .card{
     background:var(--card);
     border-radius:var(--radius);
     padding:22px 24px;
-    box-shadow:0 8px 24px rgba(20,30,60,.06);
+    box-shadow:var(--shadow);
   }
   .card h2{
     font-size:1.05rem;
@@ -146,17 +207,18 @@
     margin-top:-10px;
     border-radius:50%;
     background:#4b5efc;
-    border:3px solid #fff;
+    border:3px solid var(--card);
     box-shadow:0 2px 8px rgba(20,30,60,.35);
   }
   input[type=range]::-moz-range-thumb{
     width:26px;
     height:26px;
-    border:3px solid #fff;
+    border:3px solid var(--card);
     border-radius:50%;
     background:#4b5efc;
     box-shadow:0 2px 8px rgba(20,30,60,.35);
   }
+  input[type=range]:focus-visible{outline:2px solid var(--a-color);outline-offset:4px;border-radius:8px;}
   .control.a input[type=range]{accent-color:var(--a-color);}
   .control.a input[type=range]::-webkit-slider-thumb{background:var(--a-color);}
   .control.a input[type=range]::-moz-range-thumb{background:var(--a-color);}
@@ -189,7 +251,7 @@
   .legend .dot.a{background:var(--a-color);}
   .legend .dot.b{background:var(--b-color);}
   .legend .dot.ref{background:var(--ref-color);}
-  .ref-toggle{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);cursor:pointer;user-select:none;padding:6px 4px;margin:-6px -4px;}
+  .ref-toggle{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);cursor:pointer;user-select:none;padding:6px 0;margin:-6px 0;}
   .ref-toggle input[type=checkbox]{width:18px;height:18px;margin:0;flex-shrink:0;}
 
   svg{width:100%;height:auto;display:block;margin-top:10px;}
@@ -198,7 +260,7 @@
   .line-a{fill:none;stroke:var(--a-color);stroke-width:3;}
   .line-b{fill:none;stroke:var(--b-color);stroke-width:3;}
   .line-ref{fill:none;stroke:var(--ref-color);stroke-width:2;stroke-dasharray:6 5;}
-  .dot-final{stroke:white;stroke-width:2;}
+  .dot-final{stroke:var(--dot-stroke);stroke-width:2;}
 
   .table-card{grid-column:1 / -1;}
   .table-scroll{
@@ -211,7 +273,7 @@
   }
   table.year-table{
     width:100%;
-    min-width:560px;
+    min-width:0;
     border-collapse:collapse;
     font-size:.85rem;
     font-variant-numeric:tabular-nums;
@@ -222,29 +284,42 @@
     white-space:nowrap;
   }
   .year-table th:first-child, .year-table td:first-child{text-align:center;}
+  .year-table thead th:first-child,
+  .year-table tbody td:first-child{width:48px;}
   .year-table thead th{
     position:sticky;
     top:0;
     z-index:2;
     background:var(--ink);
-    color:#fff;
+    color:var(--card);
     font-weight:700;
     font-size:.75rem;
     line-height:1.3;
   }
-  .year-table thead th.col-a{background:var(--a-color);}
-  .year-table thead th.col-b{background:var(--b-color);}
-  .year-table tbody tr:nth-child(even) td:first-child{background:#f2f4f9;}
+  .year-table thead th.col-a{background:var(--a-color);color:#fff;}
+  .year-table thead th.col-b{background:var(--b-color);color:#fff;}
+  .year-table tbody tr:nth-child(even) td:first-child{background:var(--zebra);}
   .year-table tbody tr td.col-a{background:var(--a-soft);}
   .year-table tbody tr td.col-b{background:var(--b-soft);}
   .year-table tbody tr.row-zero td{color:var(--muted);font-style:italic;}
   .year-table tfoot td{
     position:sticky;
-    bottom:0;
-    background:#eef1f8;
+    background:var(--foot);
     font-weight:700;
     border-top:2px solid var(--line);
     z-index:2;
+  }
+  .year-table tfoot tr.sum-row td{
+    padding-top:14px;
+    padding-bottom:14px;
+  }
+  .year-table tfoot tr.sum-row td:first-child{
+    white-space:normal;
+    text-align:left;
+    width:48px;
+    font-size:.74rem;
+    line-height:1.3;
+    font-weight:700;
   }
   .year-table tfoot td.col-a{background:var(--a-soft);}
   .year-table tfoot td.col-b{background:var(--b-soft);}
@@ -258,9 +333,18 @@
     padding:12px;
   }
   .year-table tfoot tr.diff-row td em{font-style:normal;color:#ffd166;}
-  @media (max-width:480px){
-    table.year-table{font-size:.72rem;min-width:480px;}
-    .year-table th, .year-table td{padding:6px 6px;}
+  .year-table .h-short{display:none;}
+  @media (max-width:640px){
+    table.year-table{font-size:.7rem;}
+    .year-table th, .year-table td{padding:6px 4px;}
+    .year-table thead th{font-size:.66rem;}
+    .year-table .h-full{display:none;}
+    .year-table .h-short{display:inline;}
+    .year-table thead th:first-child,
+    .year-table tbody td:first-child,
+    .year-table tfoot tr.sum-row td:first-child{width:30px;}
+    .year-table tfoot tr.sum-row td:first-child{font-size:.66rem;}
+    .year-table tfoot tr.diff-row td{font-size:.74rem;padding:10px 8px;}
   }
 
   .kpis{
@@ -273,7 +357,7 @@
   .kpi-card{
     border-radius:var(--radius);
     padding:20px 22px;
-    box-shadow:0 8px 24px rgba(20,30,60,.06);
+    box-shadow:var(--shadow);
   }
   .kpi-card.a{background:var(--a-soft);}
   .kpi-card.b{background:var(--b-soft);}
@@ -287,15 +371,17 @@
     justify-content:space-between;
   }
   .kpi-card h3 .fund-title{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+  .kpi-card .fund-tag.low{background:var(--card);}
+  .kpi-card .fund-tag.high{background:var(--card);}
   .kpi-row{
     display:flex;
     justify-content:space-between;
     padding:7px 0;
-    border-bottom:1px dashed rgba(0,0,0,.08);
+    border-bottom:1px dashed rgba(128,128,128,.25);
     font-size:.92rem;
   }
   .kpi-row:last-child{border-bottom:none;}
-  .kpi-row .lbl{color:#555;}
+  .kpi-row .lbl{color:var(--lbl);}
   .kpi-row .v{font-weight:700;font-variant-numeric:tabular-nums;}
   .kpi-card.a .kpi-row .v{color:var(--a-color);}
   .kpi-card.b .kpi-row .v{color:var(--b-color);}
@@ -326,7 +412,7 @@
     background:var(--card);
     border-radius:var(--radius);
     padding:18px 24px;
-    box-shadow:0 8px 24px rgba(20,30,60,.06);
+    box-shadow:var(--shadow);
   }
   details.formula summary{
     cursor:pointer;
@@ -335,7 +421,7 @@
     padding:6px 2px;
     margin:-6px -2px;
   }
-  .formula-body{margin-top:14px;font-size:.92rem;line-height:1.65;color:#333;}
+  .formula-body{margin-top:14px;font-size:.92rem;line-height:1.65;color:var(--body-text);}
   .formula-body code{
     background:var(--bg);
     padding:2px 8px;
@@ -354,8 +440,7 @@
     margin-top:30px;
   }
 </style>
-</head>
-<body>
+
 <div class="wrap">
 
   <header>
@@ -409,7 +494,7 @@
           <label class="ref-toggle"><input type="checkbox" id="showRef" checked><i class="dot ref"></i>Interés compuesto "ingenuo" (sin volatilidad)</label>
         </div>
       </div>
-      <svg id="chart" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet"></svg>
+      <svg id="chart" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gráfica de capital acumulado de ambos fondos"></svg>
     </div>
 
     <div class="card table-card">
@@ -419,10 +504,10 @@
           <thead>
             <tr>
               <th>Año</th>
-              <th class="col-a">Rendimiento<br>Fondo A</th>
-              <th class="col-a">Capital fin año<br>Fondo A</th>
-              <th class="col-b">Rendimiento<br>Fondo B</th>
-              <th class="col-b">Capital fin año<br>Fondo B</th>
+              <th class="col-a"><span class="h-full">Rendimiento<br>Fondo A</span><span class="h-short">Rend.<br>A</span></th>
+              <th class="col-a"><span class="h-full">Capital fin año<br>Fondo A</span><span class="h-short">Capital<br>A</span></th>
+              <th class="col-b"><span class="h-full">Rendimiento<br>Fondo B</span><span class="h-short">Rend.<br>B</span></th>
+              <th class="col-b"><span class="h-full">Capital fin año<br>Fondo B</span><span class="h-short">Capital<br>B</span></th>
             </tr>
           </thead>
           <tbody id="yearTableBody"></tbody>
@@ -448,7 +533,7 @@
     </div>
 
     <div class="banner">
-      <div style="flex:1;min-width:280px;">
+      <div style="flex:1 1 auto;min-width:0;">
         <div class="big" id="banner-text">Cargando...</div>
         <p id="banner-sub"></p>
       </div>
@@ -469,6 +554,20 @@
           <div>Fondo B: 10% − (<span id="f-stdB">25%</span>)²/2 ≈ <b id="f-approxB">–</b></div>
         </div>
         Por eso, dos fondos con el mismo rendimiento "de folleto" pueden terminar con montos de capital muy distintos después de varios años.
+      </div>
+    </details>
+
+    <details class="formula">
+      <summary>¿Qué es exactamente la tasa CAGR?</summary>
+      <div class="formula-body">
+        La tasa <b>CAGR</b> (<i>Compound Annual Growth Rate</i>, o Tasa de Crecimiento Anual Compuesto) es el rendimiento anual promedio
+        que se necesita para que una inversión o indicador crezca desde su valor inicial hasta su valor final durante un período de varios años,
+        asumiendo que las ganancias se reinvierten cada año. Es decir, "una tasa constante de crecimiento anual, ignorando la volatilidad
+        o los altibajos que ocurrieron en los años intermedios".
+        <div class="formula-nums">
+          <div>Fondo A: de <b id="c-iniA">–</b> a <b id="c-finA">–</b> en <b class="c-years">–</b> → CAGR <b id="c-cagrA">–</b></div>
+          <div>Fondo B: de <b id="c-iniB">–</b> a <b id="c-finB">–</b> en <b class="c-years">–</b> → CAGR <b id="c-cagrB">–</b></div>
+        </div>
       </div>
     </details>
 
@@ -549,6 +648,7 @@
   const el = id => document.getElementById(id);
   const meanSlider = el('mean'), stdASlider = el('stdA'), stdBSlider = el('stdB'), yearsSlider = el('years');
   const showRef = el('showRef');
+  const narrowMQ = window.matchMedia('(max-width: 640px)');
 
   function drawChart(pathA, pathB, pathRef, n){
     const svg = el('chart');
@@ -601,10 +701,23 @@
     svg.innerHTML = s;
   }
 
+  function stickFoot(){
+    const foot = el('yearTableFoot');
+    let offset = 0;
+    for(let i = foot.rows.length - 1; i >= 0; i--){
+      const row = foot.rows[i];
+      for(const cell of row.cells) cell.style.bottom = offset + 'px';
+      offset += row.getBoundingClientRect().height;
+    }
+  }
+
   function renderTable(retA, retB, pathA, pathB, cagrA, cagrB, n){
-    let rows = `<tr class="row-zero"><td>0</td><td class="col-a">—</td><td class="col-a">${fmtMoneyFull(pathA[0])}</td><td class="col-b">—</td><td class="col-b">${fmtMoneyFull(pathB[0])}</td></tr>`;
+    const narrow = narrowMQ.matches;
+    const cash = narrow ? fmtMoney : fmtMoneyFull;
+
+    let rows = `<tr class="row-zero"><td>0</td><td class="col-a">—</td><td class="col-a">${cash(pathA[0])}</td><td class="col-b">—</td><td class="col-b">${cash(pathB[0])}</td></tr>`;
     for(let i=1;i<=n;i++){
-      rows += `<tr><td>${i}</td><td class="col-a">${fmtPct(retA[i-1])}</td><td class="col-a">${fmtMoneyFull(pathA[i])}</td><td class="col-b">${fmtPct(retB[i-1])}</td><td class="col-b">${fmtMoneyFull(pathB[i])}</td></tr>`;
+      rows += `<tr><td>${i}</td><td class="col-a">${fmtPct(retA[i-1])}</td><td class="col-a">${cash(pathA[i])}</td><td class="col-b">${fmtPct(retB[i-1])}</td><td class="col-b">${cash(pathB[i])}</td></tr>`;
     }
     el('yearTableBody').innerHTML = rows;
 
@@ -615,20 +728,21 @@
     const diffPct = Math.abs(pathA[n]/pathB[n]-1);
 
     el('yearTableFoot').innerHTML = `
-      <tr>
-        <td>Promedio aritmético</td>
+      <tr class="sum-row">
+        <td>${narrow ? 'Prom.<br>aritm.' : 'Promedio aritmético'}</td>
         <td class="col-a">${fmtPct(meanA)}</td><td class="col-a"></td>
         <td class="col-b">${fmtPct(meanB)}</td><td class="col-b"></td>
       </tr>
-      <tr>
-        <td>CAGR (rend. compuesto real)</td>
-        <td class="col-a">${fmtPct(cagrA)}</td><td class="col-a">${fmtMoneyFull(pathA[n])}</td>
-        <td class="col-b">${fmtPct(cagrB)}</td><td class="col-b">${fmtMoneyFull(pathB[n])}</td>
+      <tr class="sum-row">
+        <td>${narrow ? 'CAGR<br>real' : 'CAGR (rend. compuesto real)'}</td>
+        <td class="col-a">${fmtPct(cagrA)}</td><td class="col-a">${cash(pathA[n])}</td>
+        <td class="col-b">${fmtPct(cagrB)}</td><td class="col-b">${cash(pathB[n])}</td>
       </tr>
       <tr class="diff-row">
         <td colspan="5">Diferencia de capital acumulado: <em>${winnerIsA ? 'Fondo A' : 'Fondo B'}</em> termina con <em>${fmtMoneyFull(diff)} más</em> (${fmtPct(diffPct)}) que el otro fondo, con el mismo rendimiento promedio aritmético.</td>
       </tr>
     `;
+    stickFoot();
   }
 
   function update(){
@@ -679,6 +793,14 @@
     el('f-approxA').textContent = fmtPct(mean - (stdA*stdA)/2);
     el('f-approxB').textContent = fmtPct(mean - (stdB*stdB)/2);
 
+    el('c-iniA').textContent = fmtMoneyFull(INITIAL);
+    el('c-finA').textContent = fmtMoneyFull(pathA[n]);
+    el('c-cagrA').textContent = fmtPct(cagrA);
+    el('c-iniB').textContent = fmtMoneyFull(INITIAL);
+    el('c-finB').textContent = fmtMoneyFull(pathB[n]);
+    el('c-cagrB').textContent = fmtPct(cagrB);
+    document.querySelectorAll('.c-years').forEach(e => { e.textContent = n + ' años'; });
+
     const winnerIsA = pathA[n] >= pathB[n];
     const winnerFinal = winnerIsA ? pathA[n] : pathB[n];
     const loserFinal = winnerIsA ? pathB[n] : pathA[n];
@@ -708,8 +830,7 @@
     resizeTimer = setTimeout(update, 100);
   });
   window.addEventListener('orientationchange', ()=> setTimeout(update, 150));
+  narrowMQ.addEventListener('change', update);
   update();
 })();
 </script>
-</body>
-</html>
