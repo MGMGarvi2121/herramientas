@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Probabilidad de fallecimiento entre socios o familiares</title>
+<meta name="description" content="Calculadora interactiva: probabilidad de que fallezcan exactamente k de n socios o familiares hasta una edad máxima dada, con tablas de mortalidad mexicanas por edad y sexo.">
+<style>
+  :root {
+    --azul: #1d5fc4;
+    --azul-osc: #16408a;
+    --azul-claro: #eaf1fd;
+    --tinta: #16233a;
+    --gris: #5f6b80;
+    --gris-claro: #8c96a8;
+    --linea: #dfe5ef;
+    --fondo: #eef1f7;
+    --panel: #ffffff;
+    --panel-2: #f7f9fc;
+    --hombre: #1d5fc4;
+    --mujer: #a8339a;
+    --radio: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--fondo);
+    color: var(--tinta);
+    line-height: 1.45;
+    font-size: 14px;
+    padding: 14px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  /* ---------- Encabezado ---------- */
+  header {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-osc) 100%);
+    color: #fff;
+    border-radius: var(--radio);
+    padding: 16px 20px;
+    margin-bottom: 14px;
+  }
+  header h1 { font-size: 1.32rem; letter-spacing: -0.01em; }
+  header p { font-size: 0.78rem; opacity: 0.88; margin-top: 3px; }
+  header p.autor { font-size: 0.82rem; opacity: 1; margin-top: 5px; }
+  header p.autor b { font-weight: 700; }
+
+  /* ---------- Rejilla ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .panel-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 12px;
+  }
+  .panel-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .panel-head .panel-title { flex: 1; min-width: 160px; }
+
+  .escala { display: flex; gap: 0; border: 1px solid var(--linea); border-radius: 999px; overflow: hidden; }
+  .escala button {
+    font: inherit; font-size: 0.68rem; font-weight: 600;
+    padding: 4px 11px; border: none; cursor: pointer;
+    background: #fff; color: var(--gris); white-space: nowrap;
+  }
+  .escala button.on { background: var(--azul); color: #fff; }
+
+  .btn-reset {
+    font: inherit; font-size: 0.68rem; font-weight: 600;
+    padding: 4px 11px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--linea); background: #fff; color: var(--gris);
+  }
+  .btn-reset:hover { background: var(--azul-claro); color: var(--azul-osc); border-color: var(--azul-claro); }
+
+  /* ---------- Controles ---------- */
+  .control { margin-bottom: 16px; }
+  .control:last-child { margin-bottom: 4px; }
+  .control-head {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; margin-bottom: 6px;
+  }
+  .control-head label { font-size: 0.82rem; color: var(--gris); }
+  .chip {
+    background: var(--azul-claro);
+    color: var(--azul-osc);
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 3px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .chip.c2 { background: #fdf0e3; color: #94581a; }
+  .chip.c3 { background: #f0ecfc; color: #5a3fa8; }
+
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 5px; border-radius: 3px;
+    background: var(--linea); outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 17px; height: 17px; border-radius: 50%;
+    background: var(--azul); border: 3px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.32); cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--azul); border: 3px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.32); cursor: pointer;
+  }
+  input.r2[type=range]::-webkit-slider-thumb { background: #e08a2e; }
+  input.r2[type=range]::-moz-range-thumb { background: #e08a2e; }
+  input.r3[type=range]::-webkit-slider-thumb { background: #7b5cd6; }
+  input.r3[type=range]::-moz-range-thumb { background: #7b5cd6; }
+
+  /* ---------- Socios ---------- */
+  .socios { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 400px) { .socios { grid-template-columns: 1fr; } }
+  .socio {
+    border: 1px solid var(--linea);
+    border-left: 4px solid var(--ac, var(--azul));
+    border-radius: 8px;
+    padding: 9px 10px;
+    background: var(--panel-2);
+  }
+  .socio h3 {
+    font-size: 0.76rem; font-weight: 700; color: var(--ac);
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 4px 8px; flex-wrap: wrap; line-height: 1.3;
+  }
+  .socio h3 .edad { white-space: nowrap; }
+  .socio h3 .edad { font-variant-numeric: tabular-nums; color: var(--tinta); }
+  .socio input[type=range] { margin: 7px 0 9px; }
+  .socio input[type=range]::-webkit-slider-thumb { background: var(--ac); }
+  .socio input[type=range]::-moz-range-thumb { background: var(--ac); }
+
+  .genero { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .genero button {
+    font: inherit; font-size: 0.75rem; font-weight: 600;
+    padding: 5px 2px; border-radius: 6px; cursor: pointer;
+    border: 1px solid var(--linea); background: #fff; color: var(--gris);
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .genero button.on-h { background: var(--hombre); border-color: var(--hombre); color: #fff; }
+  .genero button.on-m { background: var(--mujer); border-color: var(--mujer); color: #fff; }
+
+  .socio .pind {
+    margin-top: 8px; padding-top: 7px;
+    border-top: 1px dashed var(--linea);
+    font-size: 0.7rem; color: var(--gris-claro); line-height: 1.35;
+  }
+  .socio .pind b { color: var(--tinta); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Resultado principal ---------- */
+  .res-title { font-size: 0.85rem; color: var(--gris); margin-bottom: 4px; }
+  .res-title b { color: var(--tinta); }
+  .res-big {
+    font-size: clamp(2.1rem, 6vw, 3rem);
+    font-weight: 800; color: var(--azul);
+    letter-spacing: -0.02em; line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+  .res-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+  .res-chips span {
+    background: var(--panel-2); border: 1px solid var(--linea);
+    border-radius: 999px; padding: 4px 11px;
+    font-size: 0.74rem; color: var(--gris); font-variant-numeric: tabular-nums;
+  }
+  .res-chips span b { color: var(--tinta); }
+
+  /* ---------- Gráfica ---------- */
+  .chart-wrap { overflow-x: auto; }
+  .chart-wrap svg { display: block; width: 100%; min-width: 480px; height: auto; }
+  .chart-note {
+    font-size: 0.72rem; color: var(--gris-claro);
+    text-align: center; margin-top: 6px;
+  }
+  .chart-note b { color: var(--gris); }
+
+  /* ---------- Desplegables ---------- */
+  details {
+    background: var(--panel); border: 1px solid var(--linea);
+    border-radius: var(--radio); margin-bottom: 14px;
+  }
+  details > summary {
+    cursor: pointer; list-style: none; padding: 12px 14px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--gris);
+    display: flex; align-items: center; gap: 8px;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before {
+    content: "\25B8"; transition: transform .15s; font-size: 0.9rem; color: var(--azul);
+  }
+  details[open] > summary::before { transform: rotate(90deg); }
+  .details-body { padding: 0 14px 14px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--linea); }
+  th { color: var(--gris); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td:last-child, th:last-child { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.suma td { font-weight: 700; border-bottom: none; border-top: 2px solid var(--linea); }
+  td .resto { color: var(--gris-claro); }
+  .tbl-scroll { max-height: 340px; overflow: auto; }
+
+  /* ---------- Metodología ---------- */
+  .met p { font-size: 0.78rem; color: var(--gris); margin-bottom: 9px; }
+  .met .formula {
+    background: var(--panel-2); border: 1px solid var(--linea);
+    border-radius: 8px; padding: 10px 12px; margin: 4px 0 12px;
+    font-size: 0.82rem; text-align: center; color: var(--tinta);
+    overflow-x: auto;
+  }
+  .met h4 { font-size: 0.78rem; margin: 12px 0 5px; }
+  .met ul { margin: 0 0 10px 16px; }
+  .met li { font-size: 0.76rem; color: var(--gris); margin-bottom: 4px; }
+  .met a { color: var(--azul); }
+  .met .aviso {
+    font-size: 0.74rem; color: var(--gris);
+    background: #fff8e8; border: 1px solid #f0e0bd;
+    border-radius: 8px; padding: 9px 11px;
+  }
+  var { font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Probabilidad de fallecimiento entre socios o familiares</h1>
+    <p class="autor">Desarrollado por: <b>Mario García</b>, Grupo&nbsp;CF3</p>
+    <p>México &middot; estadísticas 2023 (INEGI&nbsp;/&nbsp;CONAPO) &middot; eventos mutuamente excluyentes &middot; mueve los controles y todo se recalcula al instante</p>
+  </header>
+
+  <div class="layout">
+
+    <!-- ============ COLUMNA IZQUIERDA ============ -->
+    <div>
+      <section class="panel">
+        <div class="panel-title">Parámetros</div>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="nSocios">Número de socios o familiares</label>
+            <span class="chip" id="nSociosVal">6</span>
+          </div>
+          <input type="range" id="nSocios" min="1" max="6" step="1" value="6">
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="edadObj">Edad máxima de fallecimiento supuesta</label>
+            <span class="chip c2" id="edadObjVal">65 años</span>
+          </div>
+          <input type="range" class="r2" id="edadObj" min="55" max="70" step="1" value="65">
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="kFallecen">¿Cuántos socios o familiares fallecen? (k)</label>
+            <span class="chip c3" id="kVal">6 (todos)</span>
+          </div>
+          <input type="range" class="r3" id="kFallecen" min="1" max="6" step="1" value="6">
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Socios o familiares &mdash; edad actual (24&ndash;50) y género</div>
+          <button type="button" id="btnReset" class="btn-reset" title="Volver a las edades y géneros iniciales">Restablecer</button>
+        </div>
+        <div class="socios" id="socios"></div>
+      </section>
+    </div>
+
+    <!-- ============ COLUMNA DERECHA ============ -->
+    <div>
+      <section class="panel">
+        <div class="res-title" id="resTitle"></div>
+        <div class="res-big" id="resBig">&mdash;</div>
+        <div class="res-chips" id="resChips"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title" id="chartTitle">Distribución porcentual (barras 3D)</div>
+          <div class="escala" role="group" aria-label="Escala del eje vertical">
+            <button type="button" id="escLin" class="on">Escala lineal</button>
+            <button type="button" id="escLog">Escala log</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><svg id="chart" viewBox="0 0 660 252" role="img" aria-labelledby="chartDesc"><desc id="chartDesc"></desc></svg></div>
+        <div class="chart-note" id="chartNote"></div>
+      </section>
+
+      <details id="detCombos">
+        <summary>Ver las combinaciones mutuamente excluyentes que se suman</summary>
+        <div class="details-body">
+          <div class="tbl-scroll">
+            <table>
+              <thead><tr><th>Evento (quiénes fallecen hasta los <span id="thEdad">65</span>)</th><th>Probabilidad</th></tr></thead>
+              <tbody id="combosBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details id="detMet">
+        <summary>Metodología y fuentes (toca para abrir)</summary>
+        <div class="details-body met">
+          <p>Cada socio o familiar <var>i</var> tiene una probabilidad <var>p<sub>i</sub></var> de fallecer <b>en algún momento</b> entre su edad actual y la edad máxima supuesta <var>T</var> (ambas inclusive), encadenando las probabilidades anuales de muerte <var>q<sub>x</sub></var> por edad y sexo (tabla mexicana 2023):</p>
+          <div class="formula">p<sub>i</sub> = 1 &minus; &prod;<sub>x = edad<sub>i</sub></sub><sup>T</sup> (1 &minus; q<sub>x</sub>)</div>
+
+          <p>Cada persona puede fallecer a <b>cualquier edad</b> de su propio intervalo: no se supone que todas fallezcan a la misma edad, ni que lo hagan justo a los <var>T</var> años. Como cada quien parte de una edad distinta, cada <var>p<sub>i</sub></var> abarca un número de años diferente.</p>
+
+          <p>El evento «fallecen exactamente <var>k</var> de los <var>n</var> socios o familiares» se separa en las C(<var>n</var>,<var>k</var>) combinaciones de quiénes fallecen. Son <b>eventos mutuamente excluyentes</b> (no pueden ocurrir dos a la vez), así que su probabilidad total es la suma:</p>
+          <div class="formula">P(exactamente k) = &Sigma;<sub>|S| = k</sub> &prod;<sub>i&isin;S</sub> p<sub>i</sub> &middot; &prod;<sub>j&notin;S</sub> (1 &minus; p<sub>j</sub>)</div>
+
+          <p>Se supone independencia entre los fallecimientos y una tabla de periodo (tasas de 2023 constantes en el tiempo); como la mortalidad tiende a bajar, las probabilidades reales tenderían a ser algo menores.</p>
+
+          <h4>Fuentes</h4>
+          <ul>
+            <li><a href="https://www.inegi.org.mx/programas/edr/" target="_blank" rel="noopener">INEGI &mdash; Estadísticas de Defunciones Registradas (EDR) 2023</a> (799,869 defunciones en 2023; 55.8&nbsp;% hombres, 44.1&nbsp;% mujeres)</li>
+            <li><a href="https://www.inegi.org.mx/temas/mortalidad/" target="_blank" rel="noopener">INEGI &mdash; Mortalidad</a></li>
+            <li><a href="https://www.gob.mx/conapo/documentos/bases-de-datos-de-la-conciliacion-demografica-1950-2019-y-proyecciones-de-la-poblacion-de-mexico-2020-2070" target="_blank" rel="noopener">CONAPO &mdash; Proyecciones de la Población de México 2020&ndash;2070</a> (tablas de mortalidad <var>q<sub>x</sub></var> por edad y sexo)</li>
+          </ul>
+
+          <p class="aviso">Las <var>q<sub>x</sub></var> usadas son aproximaciones 2023 interpoladas del nivel de mortalidad de CONAPO&nbsp;/&nbsp;INEGI. Para uso actuarial formal (seguros entre socios o familiares, convenios de compra-venta), sustituir por la tabla oficial exacta (CONAPO o CNSF) y validar con un actuario.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // =================================================================
+  // Tabla de mortalidad: probabilidad anual de fallecer qx por edad
+  // y sexo. Aproximación 2023 del nivel de mortalidad mexicano
+  // (CONAPO / INEGI), ajustada con una ley de Makeham qx = C + A·e^(Bx).
+  // =================================================================
+  var QX = {
+    H: {24:0.003070,25:0.003098,26:0.003128,27:0.003162,28:0.003200,29:0.003242,
+        30:0.003288,31:0.003339,32:0.003396,33:0.003459,34:0.003530,35:0.003607,
+        36:0.003693,37:0.003789,38:0.003895,39:0.004012,40:0.004143,41:0.004287,
+        42:0.004448,43:0.004625,44:0.004823,45:0.005041,46:0.005284,47:0.005553,
+        48:0.005851,49:0.006182,50:0.006549,51:0.006956,52:0.007407,53:0.007907,
+        54:0.008463,55:0.009078,56:0.009761,57:0.010518,58:0.011358,59:0.012289,
+        60:0.013322,61:0.014468,62:0.015738,63:0.017147,64:0.018710,65:0.020443,
+        66:0.022365,67:0.024497,68:0.026861,69:0.029483,70:0.032390},
+    M: {24:0.000826,25:0.000839,26:0.000853,27:0.000869,28:0.000887,29:0.000908,
+        30:0.000930,31:0.000956,32:0.000985,33:0.001017,34:0.001053,35:0.001094,
+        36:0.001140,37:0.001192,38:0.001250,39:0.001315,40:0.001388,41:0.001470,
+        42:0.001562,43:0.001666,44:0.001783,45:0.001914,46:0.002061,47:0.002227,
+        48:0.002413,49:0.002622,50:0.002857,51:0.003121,52:0.003418,53:0.003752,
+        54:0.004126,55:0.004548,56:0.005021,57:0.005553,58:0.006151,59:0.006822,
+        60:0.007577,61:0.008425,62:0.009379,63:0.010450,64:0.011654,65:0.013007,
+        66:0.014527,67:0.016235,68:0.018155,69:0.020313,70:0.022737}
+  };
+
+  // Probabilidad de que la persona fallezca en algún momento entre su edad
+  // actual y la edad máxima supuesta `T`, ambas inclusive: puede fallecer a
+  // cualquier edad del intervalo, no necesariamente a los T años.
+  function probFallecer(edad, sexo, T) {
+    var vive = 1, tabla = QX[sexo];
+    for (var x = edad; x <= T; x++) vive *= (1 - tabla[x]);
+    return 1 - vive;
+  }
+
+  // =================================================================
+  // Estado
+  // =================================================================
+  var MAX = 6;
+  var COLORES = ["#1d5fc4", "#e0762a", "#2f9e63", "#0f9bb5", "#d64560", "#b59a17"];
+  var EDADES_INI = [35, 32, 41, 29, 46, 38];
+  var SEXOS_INI  = ["H", "M", "H", "M", "H", "M"];
+
+  var socios = [];
+  for (var i = 0; i < MAX; i++) socios.push({ edad: EDADES_INI[i], sexo: SEXOS_INI[i] });
+
+  var n = 6, T = 65, k = 6;
+  var escala = "lin"; // "lin" | "log"
+
+  // =================================================================
+  // Formato
+  // =================================================================
+  // 2 decimales para valores >= 1 %, 4 cifras significativas por debajo.
+  // El espacio antes del % es duro para que no se parta al final de línea.
+  var NBSP = " ";
+  function pct(p) {
+    var v = p * 100;
+    if (v === 0) return "0" + NBSP + "%";
+    if (v >= 1) return v.toFixed(2) + NBSP + "%";
+    var s = v.toPrecision(4);
+    if (s.indexOf("e") === -1 && s.indexOf(".") !== -1) s = s.replace(/0+$/, "").replace(/\.$/, "");
+    return s + NBSP + "%";
+  }
+  function combinaciones(n, k) {
+    var r = 1;
+    for (var i = 1; i <= k; i++) r = r * (n - k + i) / i;
+    return Math.round(r);
+  }
+
+  // =================================================================
+  // Núcleo probabilístico (Poisson-binomial)
+  // =================================================================
+  // Distribución del número de fallecimientos: dist[j] = P(fallecen j).
+  function distribucion(ps) {
+    var dist = [1];
+    ps.forEach(function (p) {
+      var nueva = new Array(dist.length + 1).fill(0);
+      for (var j = 0; j < dist.length; j++) {
+        nueva[j]     += dist[j] * (1 - p);
+        nueva[j + 1] += dist[j] * p;
+      }
+      dist = nueva;
+    });
+    return dist;
+  }
+
+  // Todos los subconjuntos de tamaño k de {0..n-1}.
+  function subconjuntos(n, k) {
+    var out = [];
+    (function rec(inicio, actual) {
+      if (actual.length === k) { out.push(actual.slice()); return; }
+      for (var i = inicio; i < n; i++) { actual.push(i); rec(i + 1, actual); actual.pop(); }
+    })(0, []);
+    return out;
+  }
+
+  // =================================================================
+  // Interfaz: socios
+  // =================================================================
+  var elSocios = document.getElementById("socios");
+
+  function pintarSocios() {
+    elSocios.innerHTML = "";
+    for (var i = 0; i < n; i++) elSocios.appendChild(tarjetaSocio(i));
+  }
+
+  function tarjetaSocio(idx) {
+    var s = socios[idx];
+    var card = document.createElement("div");
+    card.className = "socio";
+    card.style.setProperty("--ac", COLORES[idx]);
+
+    var h3 = document.createElement("h3");
+    h3.innerHTML = "Socio o familiar " + (idx + 1) + ' <span class="edad">' + s.edad + " años</span>";
+    card.appendChild(h3);
+
+    var slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "24"; slider.max = "50"; slider.step = "1";
+    slider.value = String(s.edad);
+    slider.setAttribute("aria-label", "Edad del socio o familiar " + (idx + 1));
+    card.appendChild(slider);
+
+    var gen = document.createElement("div");
+    gen.className = "genero";
+    gen.setAttribute("role", "group");
+    gen.setAttribute("aria-label", "Género del socio o familiar " + (idx + 1));
+    var bH = document.createElement("button"); bH.type = "button"; bH.textContent = "Hombre";
+    var bM = document.createElement("button"); bM.type = "button"; bM.textContent = "Mujer";
+    gen.appendChild(bH); gen.appendChild(bM);
+    card.appendChild(gen);
+
+    var pind = document.createElement("div");
+    pind.className = "pind";
+    card.appendChild(pind);
+
+    function refrescar() {
+      h3.querySelector(".edad").textContent = s.edad + " años";
+      bH.className = s.sexo === "H" ? "on-h" : "";
+      bM.className = s.sexo === "M" ? "on-m" : "";
+      pind.innerHTML = "Probabilidad de fallecer<br>hasta los " + T + " años: <b>" +
+                       pct(probFallecer(s.edad, s.sexo, T)) + "</b>";
+    }
+    card.refrescar = refrescar;
+
+    slider.addEventListener("input", function () {
+      s.edad = parseInt(slider.value, 10);
+      refrescar();
+      recalcular();
+    });
+    bH.addEventListener("click", function () { s.sexo = "H"; refrescar(); recalcular(); });
+    bM.addEventListener("click", function () { s.sexo = "M"; refrescar(); recalcular(); });
+
+    refrescar();
+    return card;
+  }
+
+  function refrescarSocios() {
+    Array.prototype.forEach.call(elSocios.children, function (c) { if (c.refrescar) c.refrescar(); });
+  }
+
+  // =================================================================
+  // Interfaz: gráfica de barras 3D
+  // =================================================================
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var PALETA = ["#9aa4b2", "#2f6fd0", "#e8892b", "#3aa76d", "#8b6fc9", "#d94f5c", "#c9b52f"];
+
+  function sombra(hex, factor) {
+    var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    function m(c) {
+      var v = factor >= 1 ? c + (255 - c) * (factor - 1) : c * factor;
+      return Math.max(0, Math.min(255, Math.round(v)));
+    }
+    return "rgb(" + m(r) + "," + m(g) + "," + m(b) + ")";
+  }
+  function nodo(tipo, attrs, texto) {
+    var el = document.createElementNS(SVG_NS, tipo);
+    for (var a in attrs) el.setAttribute(a, attrs[a]);
+    if (texto !== undefined) el.textContent = texto;
+    return el;
+  }
+
+  function pintarGrafica(dist) {
+    var svg = document.getElementById("chart");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var W = 660, base = 196, topeAlto = 138, prof = 9;
+    var margenIzq = 26, margenDer = 26;
+    var barras = dist.length;
+    var hueco = (W - margenIzq - margenDer) / barras;
+    var ancho = Math.min(54, hueco * 0.6);
+    var maxP = Math.max.apply(null, dist);
+
+    // Altura de cada barra.
+    //   Lineal: estrictamente proporcional a la probabilidad, sin altura
+    //   mínima; las probabilidades diminutas deben verse diminutas.
+    //   Log: el rango se ajusta a los datos (del valor positivo más pequeño
+    //   al mayor, máximo 12 décadas) para comparar valores que difieren en
+    //   órdenes de magnitud, como ocurre con k alto.
+    var positivos = dist.filter(function (p) { return p > 0; });
+    var minP = positivos.length ? Math.min.apply(null, positivos) : 0;
+    var logMax = maxP > 0 ? Math.log10(maxP) : 0;
+    var logMin = minP > 0 ? Math.max(Math.log10(minP), logMax - 12) : logMax - 1;
+    if (logMax - logMin < 1) logMin = logMax - 1; // rango mínimo de 1 década
+    function alturaDe(p) {
+      if (p <= 0) return 0;
+      if (escala === "lin") return (p / maxP) * topeAlto;
+      var l = Math.log10(p);
+      if (l < logMin) return 0; // por debajo del rango representable
+      // La barra más pequeña visible arranca en 6 px para que se distinga.
+      return 6 + ((l - logMin) / (logMax - logMin)) * (topeAlto - 6);
+    }
+
+    svg.appendChild(nodo("desc", {}, "Distribución del número de socios o familiares que fallecen hasta los " +
+      T + " años, en escala " + (escala === "lin" ? "lineal" : "logarítmica") + "."));
+
+    // Piso
+    svg.appendChild(nodo("line", {
+      x1: margenIzq - 6, y1: base + 0.5, x2: W - margenDer + prof, y2: base + 0.5,
+      stroke: "#dfe5ef", "stroke-width": 1
+    }));
+
+    dist.forEach(function (p, j) {
+      var color = PALETA[j % PALETA.length];
+      var x = margenIzq + hueco * j + (hueco - ancho) / 2;
+      var alto = alturaDe(p);
+      var y = base - alto;
+      // En una barra muy baja la profundidad 3D fingiría altura: se recorta.
+      var pr = Math.min(prof, alto);
+
+      // cara frontal
+      svg.appendChild(nodo("rect", { x: x, y: y, width: ancho, height: alto, fill: color }));
+      // cara superior
+      svg.appendChild(nodo("polygon", {
+        points: [x, y, x + pr, y - pr, x + ancho + pr, y - pr, x + ancho, y].join(" "),
+        fill: sombra(color, 1.32)
+      }));
+      // cara lateral
+      svg.appendChild(nodo("polygon", {
+        points: [x + ancho, y, x + ancho + pr, y - pr, x + ancho + pr, y + alto - pr, x + ancho, y + alto].join(" "),
+        fill: sombra(color, 0.74)
+      }));
+
+      // etiqueta del valor
+      svg.appendChild(nodo("text", {
+        x: x + ancho / 2 + pr / 2, y: y - pr - 7,
+        "text-anchor": "middle", "font-size": 11, "font-weight": 700,
+        fill: "#16233a", "font-family": "inherit"
+      }, pct(p)));
+
+      // etiqueta del eje
+      svg.appendChild(nodo("text", {
+        x: x + ancho / 2 + prof / 2, y: base + 18,
+        "text-anchor": "middle", "font-size": 11,
+        fill: j === k ? "#16233a" : "#5f6b80",
+        "font-weight": j === k ? 700 : 400, "font-family": "inherit"
+      }, j === 0 ? "0 (nadie)" : String(j)));
+    });
+  }
+
+  // =================================================================
+  // Interfaz: tabla de combinaciones
+  // =================================================================
+  function pintarCombos(ps) {
+    var cuerpo = document.getElementById("combosBody");
+    cuerpo.innerHTML = "";
+    document.getElementById("thEdad").textContent = T;
+
+    var subs = subconjuntos(n, k);
+    var suma = 0;
+
+    subs.forEach(function (S) {
+      var p = 1;
+      for (var i = 0; i < n; i++) p *= (S.indexOf(i) !== -1) ? ps[i] : (1 - ps[i]);
+      suma += p;
+
+      var etiqueta = S.map(function (i) { return "Socio o familiar " + (i + 1); }).join(" y ");
+      if (k < n) etiqueta += ' <span class="resto">(los demás sobreviven)</span>';
+
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td>" + etiqueta + "</td><td>" + pct(p) + "</td>";
+      cuerpo.appendChild(tr);
+    });
+
+    var trS = document.createElement("tr");
+    trS.className = "suma";
+    trS.innerHTML = "<td>Suma (" + subs.length + (subs.length === 1 ? " evento" : " eventos mutuamente excluyentes") +
+                    ")</td><td>" + pct(suma) + "</td>";
+    cuerpo.appendChild(trS);
+  }
+
+  // =================================================================
+  // Recálculo general
+  // =================================================================
+  function recalcular() {
+    var ps = [];
+    for (var i = 0; i < n; i++) ps.push(probFallecer(socios[i].edad, socios[i].sexo, T));
+
+    var dist = distribucion(ps);
+    var exacta = dist[k];
+    var nadie = dist[0];
+
+    document.getElementById("resTitle").innerHTML =
+      "Probabilidad de que " + (k === 1 ? "fallezca" : "fallezcan") +
+      " exactamente <b>" + k + (n === 1 ? " de 1 socio o familiar" : " de los " + n + " socios o familiares") +
+      "</b> hasta los <b>" + T + " años</b>";
+
+    document.getElementById("resBig").textContent = pct(exacta);
+
+    document.getElementById("resChips").innerHTML =
+      "<span>" + k + (k === 1 ? " fallecimiento" : " fallecimientos") + ": <b>" +
+        pct(exacta) + "</b></span>" +
+      "<span>Nadie fallece: <b>" + pct(nadie) + "</b></span>" +
+      "<span>Combinaciones: <b>" + combinaciones(n, k) + "</b> — C(" + n + "," + k + ")</span>";
+
+    document.getElementById("chartTitle").textContent =
+      "Distribución porcentual: ¿cuántos socios o familiares fallecen hasta los " + T + "?";
+
+    document.getElementById("chartNote").innerHTML = escala === "lin"
+      ? "Incluye la probabilidad de que <b>nadie fallezca</b>, por eso los porcentajes suman 100&nbsp;%. " +
+        "La altura es proporcional a la probabilidad: las barras muy pequeñas son casi invisibles porque " +
+        "realmente lo son &mdash; usa la <b>escala log</b> para compararlas entre sí."
+      : "Escala <b>logarítmica</b>: cada tramo igual de altura equivale a multiplicar por 10. " +
+        "Sirve para comparar entre sí las probabilidades pequeñas, pero las alturas <b>ya no son proporcionales</b> " +
+        "a la probabilidad.";
+
+    pintarGrafica(dist);
+    pintarCombos(ps);
+  }
+
+  // =================================================================
+  // Controles globales
+  // =================================================================
+  var slN = document.getElementById("nSocios");
+  var slT = document.getElementById("edadObj");
+  var slK = document.getElementById("kFallecen");
+
+  function etiquetaK() {
+    document.getElementById("kVal").textContent = k + (k === n ? " (todos)" : "");
+  }
+
+  slN.addEventListener("input", function () {
+    n = parseInt(slN.value, 10);
+    document.getElementById("nSociosVal").textContent = n;
+    slK.max = String(n);
+    if (k > n) { k = n; slK.value = String(k); }
+    etiquetaK();
+    pintarSocios();
+    recalcular();
+  });
+
+  slT.addEventListener("input", function () {
+    T = parseInt(slT.value, 10);
+    document.getElementById("edadObjVal").textContent = T + " años";
+    refrescarSocios();
+    recalcular();
+  });
+
+  slK.addEventListener("input", function () {
+    k = parseInt(slK.value, 10);
+    etiquetaK();
+    recalcular();
+  });
+
+  // Escala de la gráfica
+  var btnLin = document.getElementById("escLin");
+  var btnLog = document.getElementById("escLog");
+  function ponEscala(modo) {
+    escala = modo;
+    btnLin.className = modo === "lin" ? "on" : "";
+    btnLog.className = modo === "log" ? "on" : "";
+    recalcular();
+  }
+  btnLin.addEventListener("click", function () { ponEscala("lin"); });
+  btnLog.addEventListener("click", function () { ponEscala("log"); });
+
+  // Restablecer edades y géneros iniciales
+  document.getElementById("btnReset").addEventListener("click", function () {
+    for (var i = 0; i < MAX; i++) {
+      socios[i].edad = EDADES_INI[i];
+      socios[i].sexo = SEXOS_INI[i];
+    }
+    pintarSocios();
+    recalcular();
+  });
+
+  // Arranque
+  etiquetaK();
+  pintarSocios();
+  recalcular();
+})();
+</script>
+</body>
+</html>
